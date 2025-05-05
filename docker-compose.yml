@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: clip-cut
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google_auth
+    ports:
+      - 8080:8080
+    secrets:
+      - google_auth
+
+secrets:
+  google_auth:
+    file: starlit-myth-402020-0fb7a0af1581.json

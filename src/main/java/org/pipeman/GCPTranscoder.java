@@ -29,9 +29,6 @@ public class GCPTranscoder {
         if (payload.bitrate == null)
             throw new BadRequestResponse("Missing 'bitrate'");
 
-        if (true)
-            return;
-
         if (!GCPStorage.exists(file)) throw new BadRequestResponse("File not found");
 
         EditAtom.Builder atomBuilder = EditAtom.newBuilder()
@@ -45,6 +42,7 @@ public class GCPTranscoder {
 
         VideoStream.H264CodecSettings.Builder codecSettings = VideoStream.H264CodecSettings.newBuilder()
                 .setBitrateBps(payload.bitrate)
+                .setFrameRate(30)
                 .setWidthPixels(1280)
                 .setHeightPixels(720);
 
@@ -62,7 +60,7 @@ public class GCPTranscoder {
                         .setKey("audio-stream0")
                         .setAudioStream(AudioStream.newBuilder()
                                 .setCodec("aac")
-                                .setBitrateBps(16_000)
+                                .setBitrateBps(64_000)
                                 .build())
                 )
                 .addMuxStreams(MuxStream.newBuilder()
@@ -95,10 +93,10 @@ public class GCPTranscoder {
 
         Job job = transcoderClient.getJob(jobName);
 
-        String url = job.getOutputUri() + job.getConfig().getMuxStreams(0).getKey();
+        String fileName = "processed/" + job.getConfig().getMuxStreams(0).getKey() + ".mp4";
         boolean done = job.getState() == Job.ProcessingState.SUCCEEDED;
 
-        ctx.json(new JobStatus(done, done ? url : null));
+        ctx.json(new JobStatus(done, done ? GCPStorage.getDownloadUrl(fileName) : null));
     }
 
     private record CreateTranscodeJobPayload(Float startTime, Float endTime, Integer bitrate, Float frameRate) {

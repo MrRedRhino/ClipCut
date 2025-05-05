@@ -3,9 +3,7 @@ package org.pipeman;
 import com.google.cloud.storage.*;
 import io.javalin.http.Context;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -39,12 +37,17 @@ public class GCPStorage {
         return "gs://" + bucket + "/" + file;
     }
 
-    public static void generateUploadUrl(Context ctx) throws IOException {
+    public static String getDownloadUrl(String file) {
+        return "https://storage.googleapis.com/" + bucket + "/" + file;
+    }
+
+    public static void generateUploadUrl(Context ctx) {
         String filename = UUID.randomUUID().toString();
         URL url = generateSignedUploadUrl(filename);
         ctx.json(Map.of(
                 "url", url,
-                "fileId", filename
+                "fileId", filename,
+                "downloadUrl", getDownloadUrl(filename)
         ));
     }
 }

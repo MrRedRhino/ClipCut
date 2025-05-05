@@ -1,6 +1,6 @@
 export const db = await openDB();
 
-function openDB() {
+async function openDB() {
     return new Promise((resolve, reject) => {
         const request = window.indexedDB.open("ClipCut", 1);
         request.onerror = e => reject(e);
@@ -20,7 +20,7 @@ function openDB() {
     });
 }
 
-export function saveDirHandle(handle) {
+export async function saveDirHandle(handle) {
     return new Promise(resolve => {
         db.transaction(["directoryHandles"], "readwrite")
             .objectStore("directoryHandles")
@@ -29,7 +29,7 @@ export function saveDirHandle(handle) {
     });
 }
 
-export function getDirHandle() {
+export async function getDirHandle() {
     return new Promise(resolve => {
         db.transaction(["directoryHandles"], "readonly")
             .objectStore("directoryHandles")

@@ -1,5 +1,5 @@
 <script setup>
-import {inject, onMounted, ref, watch} from "vue";
+import {inject, onMounted, ref} from "vue";
 import {trim} from "@/ffmpeg-integration.js";
 import {getReadableFileSizeString} from "../filelist.js";
 import {ToggleSwitch} from "primevue";
@@ -24,13 +24,19 @@ onMounted(async () => {
 });
 
 async function submit() {
-  const task = createTask(`Upload ${file.name}`);
-  const id = await upload(file, progress => task.progress = progress);
-  task.done = true;
+  const data = dialogRef.value.data;
 
-  const compressionTask = createTask(`Compress ${file.name}`);
-  await compressUploadedFile(id);
-  compressionTask.done = true;
+  dialogRef.value.close();
+
+  const task = createTask(`Upload ${file.name}`);
+  const {fileId, downloadUrl} = await upload(file, progress => task.progress = progress);
+  task.url = downloadUrl;
+
+  if (compress.value) {
+    const compressionTask = createTask(`Compress ${file.name}`);
+    compressionTask.url = await compressUploadedFile(fileId, targetSize.value * 1_048_576 / (data.end - data.start) * 8);
+  }
+  // compressionTask.url = await compressUploadedFile(fileId, targetSize.value * 1_048_576);
 }
 </script>
 
